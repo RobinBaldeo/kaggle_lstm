@@ -19,10 +19,20 @@ class DataParsing:
                                        )
 
     def _pos_tags(self, r):
+        """
+        verify that the tokens are exactly the same as kaggle token
+        :param pandas column:
+        :return:
+        """
         doc, to_tokens = r
         return [token.tag_ for token in doc if token.text in to_tokens]
 
     def _chunk_sequence(self, r):
+        """
+        the method takes does the chunking of the txt into n chunks with overlaps
+        :param r: each row in the dataframe
+        :return: list of chunks for labels, pos, and tokens
+        """
         lst = []
 
         doc, tokens, labels, pos, chunk_size, overlap = r
@@ -46,6 +56,11 @@ class DataParsing:
 
     @process_time
     def fit_transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        preform the chunking of the json file for further processing
+        :param df:
+        :return:
+        """
         nlp = spacy.load("en_core_web_sm")
         df_ = (
             df
