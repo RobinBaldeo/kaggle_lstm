@@ -1,5 +1,9 @@
+
+
 import functools
-import time, math
+import pdb
+import time, math, itertools
+import numpy as np
 
 
 def process_time(func):
@@ -8,6 +12,7 @@ def process_time(func):
     :param func:
     :return:
     """
+
     @functools.wraps(func)
     def wrap_it(*args, **kwargs):
         start_time = time.perf_counter()
@@ -21,3 +26,19 @@ def process_time(func):
         return result
 
     return wrap_it
+
+
+def flatten_out_list(lst):
+    """
+    flatter out a list to unique list
+    :param lst:
+    :return:
+    """
+    return list(set(itertools.chain(*lst)))
+
+
+
+
+
+
+
