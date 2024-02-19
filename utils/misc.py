@@ -37,7 +37,17 @@ def flatten_out_list(lst):
     return list(set(itertools.chain(*lst)))
 
 
-
+def build_vocab(data):
+    """
+    convert the words to numerical mapping
+    :param data: list of list of words
+    :return: dic of key = words key = numbers
+    """
+    vocab = {"<PAD>": 0, "<UNK>": 1}
+    unique_values = list(set(itertools.chain(*data)))
+    for i, j in enumerate(unique_values, start = 2):
+        vocab[j] =i
+    return vocab
 
 
 
