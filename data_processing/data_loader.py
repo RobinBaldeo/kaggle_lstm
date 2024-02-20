@@ -32,7 +32,6 @@ class PIIDataset(Dataset):
                 [self.label_to_idx.get(label, self.label_to_idx["<UNK>"]) for label in record["labels"]],
                 dtype=torch.long, device=self.device)
             record_tensors = tokens_tensor, pos_tags_tensor, labels_tensor
-
         else:
             record_tensors = tokens_tensor, pos_tags_tensor
         return record_tensors
@@ -69,5 +68,4 @@ class CustomCollateFn:
             results = tokens_padded, pos_tags_padded, labels_padded
         else:
             results = tokens_padded, pos_tags_padded, None
-
         return results

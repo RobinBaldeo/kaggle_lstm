@@ -41,11 +41,18 @@ if __name__ == '__main__':
     labels_tokens = build_vocab(x_train.labels.to_list())
     pos_tokens = build_vocab(x_train.pos.to_list())
 
-    x_train_t = PIIDataset(x_train, word_to_idx=vocab_tokens, pos_to_idx=pos_tokens, label_to_idx=labels_tokens)
+    x_train_t = PIIDataset(x_train,
+                           word_to_idx=vocab_tokens,
+                           pos_to_idx=pos_tokens,
+                           label_to_idx=labels_tokens)
 
-    collate_fn = CustomCollateFn(chunk_size=chunk_size, word_to_idx=vocab_tokens, pos_to_idx=pos_tokens,
+    collate_fn = CustomCollateFn(chunk_size=chunk_size,
+                                 word_to_idx=vocab_tokens,
+                                 pos_to_idx=pos_tokens,
                                  label_to_idx=labels_tokens)
-    loader = DataLoader(x_train_t, batch_size= batch_size, collate_fn=collate_fn)
+    loader = DataLoader(x_train_t,
+                        batch_size= batch_size,
+                        collate_fn=collate_fn)
 
     for t,p,l in loader:
         tokens_padded, pos_tags_padded, labels_padded = t.to(device), p.to(device), l.to(device)
