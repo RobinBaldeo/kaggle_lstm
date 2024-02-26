@@ -1,11 +1,7 @@
-import torch
-import torch.nn as nn
-from TorchCRF import CRF
 
 import torch
 import torch.nn as nn
-from TorchCRF import CRF
-
+from torchcrf import CRF
 
 class BiLSTM_CRF(nn.Module):
     def __init__(self, vocab_size, pos_vocab_size, embedding_dim, hidden_dim, num_tags, pad_token_index, num_layers=1,
@@ -13,7 +9,7 @@ class BiLSTM_CRF(nn.Module):
         super(BiLSTM_CRF, self).__init__()
         self.num_layers = num_layers
         self.dropout_rate = dropout_rate
-        self.pad_token_index = pad_token_index  # Padding token index for mask calculation
+        self.pad_token_index = pad_token_index
 
         self.token_embedding = nn.Embedding(vocab_size, embedding_dim)
         self.pos_embedding = nn.Embedding(pos_vocab_size, embedding_dim)
@@ -27,7 +23,7 @@ class BiLSTM_CRF(nn.Module):
 
         self.hidden2tag = nn.Linear(hidden_dim, num_tags)
 
-        self.crf = CRF(num_tags)
+        self.crf = CRF(num_tags, batch_first = True)
 
     def forward(self, tokens, pos_tags, labels=None):
 
@@ -39,11 +35,7 @@ class BiLSTM_CRF(nn.Module):
 
         emissions = self.hidden2tag(lstm_out)
 
-        mask = (tokens != self.pad_token_index)
-
         if labels is not None:
-
-            return -self.crf(emissions, labels, mask=mask)
+            return  -self.crf(emissions, labels)
         else:
-
             return self.crf.decode(emissions)

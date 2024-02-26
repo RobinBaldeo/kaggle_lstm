@@ -11,7 +11,9 @@ from utils.misc import process_time
 
 class DataParsing:
 
-    def __init__(self, chunk_size=400, overlap=2):
+    def __init__(self, device, batch_size, chunk_size=400, overlap=2):
+        self.batch_size = batch_size
+        self.device = device
         self.chunk_size = chunk_size
         self.overlap = overlap
         self.chunk_holder = namedtuple('chunk_holder',
@@ -61,12 +63,17 @@ class DataParsing:
         :param df:
         :return:
         """
+
+        if self.device.type == 'cuda':
+            spacy.require_gpu()
+            print('running on gpu')
+
         nlp = spacy.load("en_core_web_sm")
         df_ = (
             df
             .copy()
             .assign(
-                docs=lambda f: list(nlp.pipe(f.full_text)),
+                docs=lambda f: list(nlp.pipe(texts=f.full_text, batch_size=self.batch_size)),
                 pos=lambda f: f.loc[:, ['docs', 'tokens']].apply(self._pos_tags, axis=1),
             )
         )
