@@ -74,7 +74,7 @@ class DataParsing:
             .copy()
             .assign(
                 docs=lambda f: list(nlp.pipe(texts=f.full_text, batch_size=self.batch_size)),
-                pos=lambda f: f.loc[:, ['docs', 'tokens']].apply(self._pos_tags, axis=1),
+                pos=lambda f: f.loc[:, ['docs', 'tokens']].apply(self._pos_tags, axis=1)
             )
         )
         # pdb.set_trace()

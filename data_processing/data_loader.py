@@ -60,12 +60,12 @@ class CustomCollateFn:
         tokens_padded = self._create_tensor(self.word_pad, tokens_batch)
         pos_tags_padded = self._create_tensor(self.pos_pad, pos_tags_batch)
 
-        if self.label_to_idx is not None:
-            labels_batch = [i[2] for i in batch]
+        if self.label_to_idx is not None and len(batch[0]) == 3:
+            labels_batch = [i[2] for i in batch if len(i) == 3]
             label_pad = self.label_to_idx["<PAD>"]
 
             labels_padded = self._create_tensor(label_pad, labels_batch )
             results = tokens_padded, pos_tags_padded, labels_padded
         else:
-            results = tokens_padded, pos_tags_padded, None
+            results = tokens_padded, pos_tags_padded
         return results

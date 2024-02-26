@@ -29,8 +29,8 @@ def predict(model, data_loader, device):
     model.eval()
     all_predictions = []
     with torch.no_grad():
-        for tokens, pos_tags, _ in data_loader:
+        for tokens, pos_tags in data_loader:
             tokens, pos_tags = tokens.to(device), pos_tags.to(device)
-            predictions = model(tokens, pos_tags)  # Get predictions
+            predictions = model(tokens, pos_tags)
             all_predictions.extend(predictions)
     return all_predictions
