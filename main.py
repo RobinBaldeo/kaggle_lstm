@@ -3,6 +3,7 @@ import os, sys, json, pdb
 # from torch.utils.tensorboard import SummaryWriter
 from data_processing.data_layer import DataParsing
 from data_processing.data_loader import PIIDataset, CustomCollateFn
+from data_processing.labels_to_data_bilstm_crf import convert_to_labels
 from utils.misc import flatten_out_list, build_vocab
 from sklearn.model_selection import train_test_split
 import torch
@@ -30,6 +31,9 @@ if __name__ == '__main__':
 
     print(f"Using device: {device}")
 
+    # TODO move to config files,
+    # Separate according to process
+
     chunk_size = 400
     overlap = 2
     test_size = 0.2
@@ -40,11 +44,13 @@ if __name__ == '__main__':
     embedding_dim = 128
     hidden_dim = 256
     pad_token_index = 0
-
+    pre_processing_chunk_size = 500
     num_layers = 1
     dropout_rate = 0.001
-    num_epochs = 20
+    num_epochs = 3
     learning_rate = 0.005
+    patience = 10
+    verbose = True
 
     df_train = load_data(train_path)
     df_test = load_data(test_path)
@@ -63,6 +69,8 @@ if __name__ == '__main__':
     x_val = dp.fit_transform(x_val)
     x_test = dp.fit_transform(df_test)
 
+    # pdb.set_trace()
+
     vocab_tokens = build_vocab(x_train.tokens.to_list())
     labels_tokens = build_vocab(x_train.labels.to_list())
     pos_tokens = build_vocab(x_train.pos.to_list())
@@ -71,6 +79,7 @@ if __name__ == '__main__':
     pos_vocab_size = len([i for i in pos_tokens.keys()])
     num_tags = len([i for i in labels_tokens.keys()])
 
+    # pdb.set_trace()
     model = BiLSTM_CRF(vocab_size=vocab_size,
                        pos_vocab_size=pos_vocab_size,
                        embedding_dim=embedding_dim,
@@ -94,7 +103,7 @@ if __name__ == '__main__':
     valid_loader = DataLoader(x_val_t, batch_size=batch_size, collate_fn=collate_fn)
     predict_loader = DataLoader(x_test_t, batch_size=batch_size, collate_fn=collate_fn)
 
-    early_stopping = EarlyStopping(patience=10, verbose=True)
+    early_stopping = EarlyStopping(patience=patience, verbose=verbose)
 
     for epoch in range(num_epochs):
         train_loss = train(model, train_loader, optimizer, device)
@@ -110,7 +119,7 @@ if __name__ == '__main__':
     # Predictions
     # load model crude implementations
 
-    checkpoint = torch.load("checkpoint.pt", map_location='cpu')
+    checkpoint = torch.load("checkpoint.pt")
     model.load_state_dict(checkpoint['model_state_dict'])
     model = model.to(device)
     model.eval()
@@ -120,7 +129,5 @@ if __name__ == '__main__':
             tokens, pos_tags = tokens.to(device), pos_tags.to(device)
             predictions.append(model(tokens, pos_tags))
 
-
+    final_predictions = convert_to_labels(x_test, predictions, labels_tokens, pre_processing_chunk_size)
     pdb.set_trace()
-
-

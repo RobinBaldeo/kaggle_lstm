@@ -1,0 +1,72 @@
+import pdb
+
+import pandas as pd
+import itertools
+from collections import namedtuple
+from typing import Dict
+from multiprocessing import cpu_count
+from joblib import Parallel, delayed
+from utils.misc import process_time
+
+prediction_elements = namedtuple('prediction_elements', 'doc_id position tokens predictions')
+
+
+def convert_doc_id_lst(row):
+    doc_id, position, *_ = row
+    return [doc_id] * len(position)
+
+
+def created_output_df(pairs, mapping):
+    doc_id, position, token, predictions = pairs
+    predict_mapped = mapping.get(predictions)
+    to_ret = prediction_elements(doc_id=doc_id, position=position, tokens=token, predictions=predict_mapped)
+
+    return to_ret
+
+
+def process_in_chunks(chunk_size, doc_id, position, tokens, predictions, reverse_mapping):
+    doc_id_lst, position_lst, tokens_lst, predictions_lst = map(list, [doc_id, position, tokens, predictions])
+    counter = len(doc_id_lst)
+
+    for i in range(0, counter, chunk_size):
+        chunk_doc_id = doc_id_lst[i:i + chunk_size]
+        chunk_position = position_lst[i:i + chunk_size]
+        chunk_tokens = tokens_lst[i:i + chunk_size]
+        chunk_predictions = predictions_lst[i:i + chunk_size]
+
+        pairs = zip(chunk_doc_id, chunk_position, chunk_tokens, chunk_predictions)
+        results = Parallel(n_jobs=-int(cpu_count()))(
+            delayed(created_output_df)(pair, reverse_mapping) for pair in pairs)
+        yield pd.DataFrame(results)
+
+
+@process_time
+def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
+    """
+    TODO
+    """
+    reverse_mapping = {j: i for i, j in mapping.items()}
+    new_df = (
+        df
+        .copy()
+        .assign(
+            expand_dic_id=lambda x: x.apply(convert_doc_id_lst, axis=1)
+        )
+    )
+
+    flat_doc_id = itertools.chain.from_iterable(new_df.expand_dic_id.to_list())
+    flat_position = itertools.chain.from_iterable(new_df.position.to_list())
+    flat_tokens = itertools.chain.from_iterable(new_df.tokens.to_list())
+    flat_predictions = itertools.chain.from_iterable(
+        itertools.chain.from_iterable(prediction))  # Nested List
+
+    results_df = pd.concat(process_in_chunks(
+        chunk_size=chunk_size,
+        doc_id=flat_doc_id,
+        position=flat_position,
+        tokens=flat_tokens,
+        predictions=flat_predictions,
+        reverse_mapping=reverse_mapping)
+    )
+
+    return results_df
