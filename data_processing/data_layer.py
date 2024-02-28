@@ -90,7 +90,7 @@ class DataParsing:
                     async_chunk_size,
                     async_overlap
                     )
-        results = Parallel(n_jobs=-int(cpu_count()))(delayed(self._chunk_sequence)(pair) for pair in pairs)
+        results = Parallel(n_jobs=int(cpu_count()) - 1)(delayed(self._chunk_sequence)(pair) for pair in pairs)
         df2 = pd.DataFrame(itertools.chain.from_iterable(results))
 
         if 'labels' not in df.columns:

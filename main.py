@@ -47,7 +47,7 @@ if __name__ == '__main__':
     pre_processing_chunk_size = 500
     num_layers = 1
     dropout_rate = 0.001
-    num_epochs = 3
+    num_epochs = 20
     learning_rate = 0.005
     patience = 10
     verbose = True
@@ -129,5 +129,6 @@ if __name__ == '__main__':
             tokens, pos_tags = tokens.to(device), pos_tags.to(device)
             predictions.append(model(tokens, pos_tags))
 
-    final_predictions = convert_to_labels(x_test, predictions, labels_tokens, pre_processing_chunk_size)
+    raw_predictions = convert_to_labels(x_test, predictions, labels_tokens, pre_processing_chunk_size)
+
     pdb.set_trace()

@@ -35,7 +35,7 @@ def process_in_chunks(chunk_size, doc_id, position, tokens, predictions, reverse
         chunk_predictions = predictions_lst[i:i + chunk_size]
 
         pairs = zip(chunk_doc_id, chunk_position, chunk_tokens, chunk_predictions)
-        results = Parallel(n_jobs=-int(cpu_count()))(
+        results = Parallel(n_jobs=int(cpu_count()) - 1)(
             delayed(created_output_df)(pair, reverse_mapping) for pair in pairs)
         yield pd.DataFrame(results)
 
@@ -69,4 +69,36 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
         reverse_mapping=reverse_mapping)
     )
 
-    return results_df
+    return (
+        pd.merge(
+            (results_df
+             .drop(columns='tokens')
+             .groupby(['doc_id', 'position', 'predictions'])
+             .agg(
+                count_=('predictions', 'count')
+            )
+             .reset_index()
+             .sort_values(by='count_', ascending=False)
+             .drop_duplicates(subset=['doc_id', 'position'], keep='first')
+             .reset_index(drop=True)
+             .drop(columns='count_')
+             ),
+            (
+                results_df
+                .drop(columns='predictions')
+                .drop_duplicates(subset=['doc_id', 'position'], keep='first')
+            )
+            , right_on=['doc_id', 'position']
+            , left_on=['doc_id', 'position']
+
+        )
+        .reset_index()
+        .rename(columns={
+            'index': 'row_id',
+            'doc_id': 'document',
+            'tokens': 'words',
+            'position': 'tokens',
+            'predictions': 'label'
+        })
+        .sort_values(by=['document', 'tokens'])
+    )
