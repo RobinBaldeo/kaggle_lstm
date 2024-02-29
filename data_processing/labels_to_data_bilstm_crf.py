@@ -24,10 +24,12 @@ def created_output_df(pairs, mapping):
     return to_ret
 
 
-def process_in_chunks(chunk_size, doc_id, position, tokens, predictions, reverse_mapping):
-    doc_id_lst, position_lst, tokens_lst, predictions_lst = map(list, [doc_id, position, tokens, predictions])
+def process_in_chunks(chunk_size, doc_id, position, tokens, predictions_lst, reverse_mapping):
+    doc_id_lst, position_lst, tokens_lst = map(list, [doc_id, position, tokens])
     counter = len(doc_id_lst)
+    assert len(doc_id_lst) == len(predictions_lst)
 
+    # pdb.set_trace()
     for i in range(0, counter, chunk_size):
         chunk_doc_id = doc_id_lst[i:i + chunk_size]
         chunk_position = position_lst[i:i + chunk_size]
@@ -57,17 +59,17 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
     flat_doc_id = itertools.chain.from_iterable(new_df.expand_dic_id.to_list())
     flat_position = itertools.chain.from_iterable(new_df.position.to_list())
     flat_tokens = itertools.chain.from_iterable(new_df.tokens.to_list())
-    flat_predictions = itertools.chain.from_iterable(
-        itertools.chain.from_iterable(prediction))  # Nested List
+    flat_predictions = itertools.chain.from_iterable(itertools.chain.from_iterable(prediction))  # Nested List
+    no_padding = [item for item in flat_predictions if item != mapping["<PAD>"]]
 
     results_df = pd.concat(process_in_chunks(
         chunk_size=chunk_size,
         doc_id=flat_doc_id,
         position=flat_position,
         tokens=flat_tokens,
-        predictions=flat_predictions,
+        predictions_lst=no_padding,
         reverse_mapping=reverse_mapping)
-    )
+    ).reset_index(drop=True)
 
     return (
         pd.merge(
@@ -92,13 +94,15 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
             , left_on=['doc_id', 'position']
 
         )
-        .reset_index()
+        .reset_index(drop=True)
         .rename(columns={
-            'index': 'row_id',
             'doc_id': 'document',
             'tokens': 'words',
             'position': 'tokens',
             'predictions': 'label'
         })
         .sort_values(by=['document', 'tokens'])
+        .reset_index(drop=False)
+        .rename(columns={'index': 'row_id'})
+        .loc[:, ['row_id', 'document', 'tokens', 'label', 'words']]
     )

@@ -1,7 +1,7 @@
-
 import torch
 import torch.nn as nn
 from torchcrf import CRF
+
 
 class BiLSTM_CRF(nn.Module):
     def __init__(self, vocab_size, pos_vocab_size, embedding_dim, hidden_dim, num_tags, pad_token_index, num_layers=1,
@@ -23,7 +23,7 @@ class BiLSTM_CRF(nn.Module):
 
         self.hidden2tag = nn.Linear(hidden_dim, num_tags)
 
-        self.crf = CRF(num_tags, batch_first = True)
+        self.crf = CRF(num_tags, batch_first=True)
 
     def forward(self, tokens, pos_tags, labels=None):
 
@@ -36,6 +36,6 @@ class BiLSTM_CRF(nn.Module):
         emissions = self.hidden2tag(lstm_out)
 
         if labels is not None:
-            return  -self.crf(emissions, labels)
+            return -self.crf(emissions, labels)
         else:
             return self.crf.decode(emissions)

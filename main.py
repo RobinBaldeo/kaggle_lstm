@@ -18,7 +18,7 @@ import torch.optim as optim
 
 def load_data(p):
     df = (pd.read_json(p)
-          .head(400)
+          .head(900)
           .reset_index()
           )
     return df
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     pre_processing_chunk_size = 500
     num_layers = 1
     dropout_rate = 0.001
-    num_epochs = 20
+    num_epochs = 35
     learning_rate = 0.005
     patience = 10
     verbose = True
@@ -68,8 +68,6 @@ if __name__ == '__main__':
     x_train = dp.fit_transform(x_train)
     x_val = dp.fit_transform(x_val)
     x_test = dp.fit_transform(df_test)
-
-    # pdb.set_trace()
 
     vocab_tokens = build_vocab(x_train.tokens.to_list())
     labels_tokens = build_vocab(x_train.labels.to_list())
@@ -99,9 +97,9 @@ if __name__ == '__main__':
 
     collate_fn = CustomCollateFn(chunk_size=chunk_size, word_to_idx=vocab_tokens, pos_to_idx=pos_tokens,
                                  label_to_idx=labels_tokens)
-    train_loader = DataLoader(x_train_t, batch_size=batch_size, collate_fn=collate_fn)
-    valid_loader = DataLoader(x_val_t, batch_size=batch_size, collate_fn=collate_fn)
-    predict_loader = DataLoader(x_test_t, batch_size=batch_size, collate_fn=collate_fn)
+    train_loader = DataLoader(x_train_t, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
+    valid_loader = DataLoader(x_val_t, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
+    predict_loader = DataLoader(x_test_t, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 
     early_stopping = EarlyStopping(patience=patience, verbose=verbose)
 
@@ -130,5 +128,6 @@ if __name__ == '__main__':
             predictions.append(model(tokens, pos_tags))
 
     raw_predictions = convert_to_labels(x_test, predictions, labels_tokens, pre_processing_chunk_size)
+    raw_predictions.to_csv('test_pred.csv', index=False)
 
     pdb.set_trace()

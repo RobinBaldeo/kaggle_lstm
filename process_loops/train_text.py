@@ -33,4 +33,5 @@ def predict(model, data_loader, device):
             tokens, pos_tags = tokens.to(device), pos_tags.to(device)
             predictions = model(tokens, pos_tags)
             all_predictions.extend(predictions)
+            # all_predictions.append(predictions)
     return all_predictions
