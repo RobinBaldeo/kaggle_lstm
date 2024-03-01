@@ -47,19 +47,22 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
     """
     TODO
     """
+
     reverse_mapping = {j: i for i, j in mapping.items()}
     new_df = (
         df
         .copy()
         .assign(
-            expand_dic_id=lambda x: x.apply(convert_doc_id_lst, axis=1)
+            expand_dic_id=lambda x: x.apply(convert_doc_id_lst, axis=1),
         )
     )
+    # pdb.set_trace()
 
     flat_doc_id = itertools.chain.from_iterable(new_df.expand_dic_id.to_list())
     flat_position = itertools.chain.from_iterable(new_df.position.to_list())
     flat_tokens = itertools.chain.from_iterable(new_df.tokens.to_list())
     flat_predictions = itertools.chain.from_iterable(itertools.chain.from_iterable(prediction))  # Nested List
+
     no_padding = [item for item in flat_predictions if item != mapping["<PAD>"]]
 
     results_df = pd.concat(process_in_chunks(
@@ -94,7 +97,6 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
             , left_on=['doc_id', 'position']
 
         )
-        .reset_index(drop=True)
         .rename(columns={
             'doc_id': 'document',
             'tokens': 'words',
@@ -102,7 +104,8 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
             'predictions': 'label'
         })
         .sort_values(by=['document', 'tokens'])
-        .reset_index(drop=False)
-        .rename(columns={'index': 'row_id'})
-        .loc[:, ['row_id', 'document', 'tokens', 'label', 'words']]
+        # .rename(columns={'index': 'row_id'})
+        .loc[:, ['document', 'tokens', 'label', 'words']]
+        .reset_index(drop=True)
     )
+
