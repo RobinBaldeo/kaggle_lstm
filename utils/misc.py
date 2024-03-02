@@ -96,7 +96,7 @@ def f5_score_mapping(df_y, df_y_hat, label_mapping: dict):
                     'label': 'y_hat'
                 }
                 )
-                .query('labels !="O"')
+                .query('y_hat !="O"')
                 .set_index(['doc_id', 'position'])
             )
             , how='outer'

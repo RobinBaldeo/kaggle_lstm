@@ -59,7 +59,7 @@ if __name__ == '__main__':
     num_layers = 1
     dropout_rate = 0.02
     num_epochs = 20
-    learning_rate = 0.002
+    learning_rate = 0.003
     patience = 5
     verbose = True
     beta = 5
