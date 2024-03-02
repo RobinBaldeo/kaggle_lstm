@@ -55,23 +55,57 @@ def build_vocab(data):
     return vocab
 
 
-def mapping_labels(pair, labels_mapping):
-    y, y_hat = pair
-    return score_elements(y=labels_mapping[y], y_hat=labels_mapping[y_hat])
-
-
 @process_time
-def f5_score_mapping(y: list, y_hat: list, label_mapping: dict, chunk_size=5000):
-    y_ = list(itertools.chain.from_iterable(y))
-    counter = len(y_)
+def f5_score_mapping(df_y, df_y_hat, label_mapping: dict):
 
-    assert counter == len(y_hat)
+    raw_df_y = (
+        df_y
+        .copy()
+        .loc[:, ['doc_id', 'position', 'labels']]
+        .assign(
+            lst_doc_id=lambda x: x.apply(lambda g: [g.doc_id] * len(g.position), axis=1),
+        )
+        .drop(columns='doc_id')
+    )
 
-    for i in range(0, counter, chunk_size):
-        chunk_y = y_[i:i + chunk_size]
-        chunk_y_hat = y_hat[i:i + chunk_size]
-        pairs = zip(chunk_y, chunk_y_hat)
+    doc_id_lst, position_lst, labels_lst = map(lambda a: list(itertools.chain.from_iterable(a)),
+                                               [raw_df_y.lst_doc_id,
+                                                raw_df_y.position,
+                                                raw_df_y.labels]
+                                               )
 
-        results = Parallel(n_jobs=int(cpu_count()) - 1)(
-            delayed(mapping_labels)(pair, label_mapping) for pair in pairs)
-        yield pd.DataFrame(results)
+    return (
+        pd.merge(
+            (pd.DataFrame({
+                'doc_id': doc_id_lst,
+                'position': position_lst,
+                'labels': labels_lst
+            })
+             .query('labels !="O"')
+             .drop_duplicates(subset=['doc_id', 'position'])
+             .rename(columns={'labels': 'y_'})
+             .reset_index(drop=True)
+             .set_index(['doc_id', 'position'])
+             ),
+            (
+                df_y_hat
+                .loc[:, ['document', 'tokens', 'label']]
+                .rename(columns={
+                    'document': 'doc_id',
+                    'tokens': 'position',
+                    'label': 'y_hat'
+                }
+                )
+                .query('labels !="O"')
+                .set_index(['doc_id', 'position'])
+            )
+            , how='outer'
+            , right_index=True
+            , left_index=True
+        )
+        .fillna('O')
+        .assign(
+            y_idx=lambda x: x.y_.map(lambda p: label_mapping.get(p, -1)),
+            y_hat_idx= lambda x: x.y_hat.map( lambda p: label_mapping.get(p, -1))
+        )
+    )

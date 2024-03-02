@@ -19,7 +19,8 @@ from sklearn.metrics import fbeta_score
 
 def load_data(p):
     df = (pd.read_json(p)
-          .head(900)
+          .loc[:1000, :]
+          # .sample(800)
           .reset_index()
           )
     return df
@@ -27,7 +28,7 @@ def load_data(p):
 
 def robin_test(p):
     df = (pd.read_json(p)
-          .loc[2000:4000, :]
+          .loc[1000:1500, :]
           .sample(100)
           .reset_index()
           )
@@ -54,20 +55,21 @@ if __name__ == '__main__':
     embedding_dim = 128
     hidden_dim = 256
     pad_token_index = 0
-    pre_processing_chunk_size = 1000
+    pre_processing_chunk_size = 5000
     num_layers = 1
-    dropout_rate = 0.001
-    num_epochs = 30
-    learning_rate = 0.005
-    patience = 10
+    dropout_rate = 0.02
+    num_epochs = 20
+    learning_rate = 0.002
+    patience = 5
     verbose = True
     beta = 5
 
-    df_train = load_data(train_path)
+    df_robin = robin_test(train_path)
+    df_train = load_data(train_path).query("~`index`.isin(@df_robin.index)", engine='python').reset_index(drop=True)
+    df_robin = df_robin.reset_index(drop=True)
     # todo robin test
     # df_test = load_data(test_path)
     # to remove
-    df_robin = robin_test(train_path)
 
     dp = DataParsing(device=device,
                      batch_size=batch_size,
@@ -86,7 +88,7 @@ if __name__ == '__main__':
     # todo robin test
     # to remove
     x_robin = dp.fit_transform(df_robin)
-    x_robin_y = df_robin.labels.to_list()
+    x_robin_y = x_robin.copy()
     x_robin = (x_robin.drop(columns='labels'))
 
     # pdb.set_trace()
@@ -163,8 +165,10 @@ if __name__ == '__main__':
     # to remove
     raw_predictions = convert_to_labels(x_robin, predictions, labels_tokens, pre_processing_chunk_size)
     raw_predictions.to_csv('test_pred.csv', index=False)
-    scoring = pd.concat(f5_score_mapping(y=x_robin_y, y_hat=raw_predictions.label, label_mapping=labels_tokens))
-    scoring.to_csv('score_test_pred.csv', index=False)
-    f5 = fbeta_score(scoring.y.to_list(), scoring.y_hat.to_list(), beta=beta, average='micro')
+
+    scoring = f5_score_mapping(df_y=x_robin_y, df_y_hat=raw_predictions, label_mapping=labels_tokens)
+
+    scoring.to_csv('score_test_pred.csv')
+    f5 = fbeta_score(scoring.y_idx.to_list(), scoring.y_hat_idx.to_list(), beta=beta, average='micro')
     print(f'the f5 score for this run: {f5}')
     pdb.set_trace()

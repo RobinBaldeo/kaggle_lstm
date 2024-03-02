@@ -18,21 +18,44 @@ class EarlyStopping:
         self.val_loss_min = np.Inf
         self.delta = delta
 
+    # def __call__(self, val_loss, model):
+    #     if self.best_loss is None:
+    #         self.best_loss = val_loss
+    #     elif val_loss > self.best_loss - self.delta:
+    #         self.counter += 1
+    #         print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+    #         if self.counter >= self.patience:
+    #             self.early_stop = True
+    #     else:
+    #         self.best_loss = val_loss
+    #         self.counter = 0
+    #         if self.verbose:
+    #             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+    #         torch.save({
+    #             'model_state_dict': model.state_dict()
+    #             # TODO
+    #         }, 'checkpoint.pt')
+    #         self.val_loss_min = val_loss
+
     def __call__(self, val_loss, model):
         if self.best_loss is None:
             self.best_loss = val_loss
-        elif val_loss > self.best_loss - self.delta:
+            self.save_checkpoint(val_loss, model)
+        elif val_loss < self.best_loss - self.delta:
+            self.save_checkpoint(val_loss, model)
+            self.counter = 0
+        else:
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
-        else:
-            self.best_loss = val_loss
-            self.counter = 0
-            if self.verbose:
-                print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-            torch.save({
-                'model_state_dict': model.state_dict()
-                # TODO
-            }, 'checkpoint.pt')
-            self.val_loss_min = val_loss
+
+    def save_checkpoint(self, val_loss, model):
+        if self.verbose:
+            print(f'Validation loss decreased ({self.best_loss:.6f} --> {val_loss:.6f}). Saving model ...')
+        torch.save({
+            'model_state_dict': model.state_dict(),
+            # TODO
+        }, 'checkpoint.pt')
+        self.best_loss = val_loss
+

@@ -27,7 +27,7 @@ def created_output_df(pairs, mapping):
 def process_in_chunks(chunk_size, doc_id, position, tokens, predictions_lst, reverse_mapping):
     doc_id_lst, position_lst, tokens_lst = map(list, [doc_id, position, tokens])
     counter = len(doc_id_lst)
-    assert len(doc_id_lst) == len(predictions_lst)
+    assert counter == len(predictions_lst)
 
     # pdb.set_trace()
     for i in range(0, counter, chunk_size):
@@ -104,7 +104,6 @@ def convert_to_labels(df, prediction, mapping: Dict, chunk_size):
             'predictions': 'label'
         })
         .sort_values(by=['document', 'tokens'])
-        # .rename(columns={'index': 'row_id'})
         .loc[:, ['document', 'tokens', 'label', 'words']]
         .reset_index(drop=True)
     )
