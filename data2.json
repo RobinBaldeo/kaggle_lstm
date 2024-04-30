@@ -1,0 +1,16 @@
+{
+    "nodes": [
+        { "id": "Node 1", "group": 1 },
+        { "id": "Node 2", "group": 1 },
+        { "id": "Node 3", "group": 2 },
+        { "id": "Node 4", "group": 2 },
+        { "id": "Node 5", "group": 3 }
+    ],
+    "links": [
+        { "source": "Node 1", "target": "Node 2", "value": [100, "Type A", "Type B"] },
+        { "source": "Node 2", "target": "Node 3", "value": [200, "Type A", "Type C"] },
+        { "source": "Node 3", "target": "Node 4", "value": [150, "Type C", "Type D"] },
+        { "source": "Node 4", "target": "Node 5", "value": [120, "Type D", "Type E"] },
+        { "source": "Node 5", "target": "Node 1", "value": [180, "Type E", "Type A"] }
+    ]
+}
