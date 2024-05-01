@@ -41,23 +41,33 @@ d3.json("data2.json").then(data => {
     // Populate classification filter dropdown
     const classificationFilter = d3.select("#classificationFilter");
 
+    // Set the default radio button to "dep"
+    d3.select('input[name="radioOption"][value="dep"]').property("checked", true);
+
+    // Load the selection for the multi-select box when "dep" is selected
+    const classifications = new Set(data.links.map(link => link.value[1]));
+    classifications.forEach(type => {
+        classificationFilter.append("option").text(type).attr("value", type);
+    });
+
     // Handle radio button change
     d3.selectAll('input[name="radioOption"]').on("change", function() {
         if (this.value === "dep") {
             // Clear the multi-select box and populate it with classifications
             classificationFilter.html("");
-            const classifications = new Set(data.links.map(link => link.value[1]));
             classifications.forEach(type => {
                 classificationFilter.append("option").text(type).attr("value", type);
             });
         } else if (this.value === "ind") {
-            // Clear the multi-select box and populate it with top sources
+            // Clear the multi-select box and populate it with top 10 sources
             classificationFilter.html("");
             const sourceFrequency = data.links.reduce((freq, link) => {
                 freq[link.source.id] = (freq[link.source.id] || 0) + 1;
                 return freq;
             }, {});
-            const topSources = Object.keys(sourceFrequency).sort((a, b) => sourceFrequency[b] - sourceFrequency[a]).slice(0, 10);
+            const topSources = Object.keys(sourceFrequency)
+                .sort((a, b) => sourceFrequency[b] - sourceFrequency[a])
+                .slice(0, 10);
             topSources.forEach(source => {
                 classificationFilter.append("option").text(source).attr("value", source);
             });
