@@ -104,7 +104,7 @@ d3.json("data2.json").then(data => {
         link = link.data(filteredLinks, d => `${d.source.id}-${d.target.id}`).join("line")
             .attr("stroke", "gray").attr("stroke-width", d => Math.sqrt(d.value[0]));
         node = node.data(filteredNodes, d => d.id).join("circle")
-            .attr("r", 10).attr("fill", d => color(d.group)).call(drag(simulation));
+            .attr("r", 10).attr("fill", d => color(d.group[0])).call(drag(simulation));
         label = label.data(filteredNodes, d => d.id).join("text")
             .text(d => d.id).attr("dx", 12).attr("dy", ".35em");
 

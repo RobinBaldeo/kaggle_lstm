@@ -1,73 +1,92 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>D3 Force-Directed Graph</title>
-  <script src="https://d3js.org/d3.v6.min.js"></script>
-  <style>
-    .container {
-      display: flex;
-    }
+    <meta charset="UTF-8">
+    <title>D3 Force-Directed Graph</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+        }
 
-    .graph-container {
-      margin-right: 20px;
-    }
+        .graph-container {
+            margin-right: 20px;
+        }
 
-    svg {
-      width: 800px;
-      height: 600px;
-      border: 1px solid black;
-    }
+        svg {
+            width: 800px;
+            height: 600px;
+            border: 1px solid black;
+        }
 
-    .control-container {
-      display: flex;
-      align-items: flex-start;
-      flex-direction: column;
-      background-color: #f2f2f2;
-      padding: 10px;
-      border-radius: 4px;
-      height: 600px;
-      box-sizing: border-box;
-    }
+        .control-container {
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-radius: 4px;
+            height: 300px;
+            box-sizing: border-box;
+        }
 
-    .control-label {
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
+        .control-label {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
 
-    .control {
-      width: 200px;
-      padding: 8px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #fff;
-      outline: none;
-      flex-grow: 1;
-    }
+        .control {
+            width: 200px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            outline: none;
+            flex-grow: 1;
+        }
 
-    .control option {
-      padding: 4px;
-    }
-  </style>
+        .control option {
+            padding: 4px;
+        }
+
+        .radio-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .radio-label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="graph-container">
-      <svg id="graph"></svg>
+    <div class="container">
+        <div class="graph-container">
+            <svg id="graph"></svg>
+        </div>
+        <div class="control-container">
+            <label class="control-label">Select Source Classification</label>
+            <select id="classificationFilter" class="control" multiple>
+                <!-- Options will be dynamically added here -->
+            </select>
+            <div class="radio-container">
+                <label class="control-label">Select Option</label>
+                <label class="radio-label">
+                    <input type="radio" name="radioOption" value="dep">
+                    Departments
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="radioOption" value="ind">
+                    Top Senders
+                </label>
+            </div>
+        </div>
     </div>
-    <div class="control-container">
-      <label class="control-label">Select Source Classification</label>
-      <select id="classificationFilter" class="control" multiple>
-        <!-- Options will be dynamically added here -->
-      </select>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
-
