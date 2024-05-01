@@ -48,10 +48,7 @@ d3.json("data2.json").then(data => {
             classificationFilter.html("");
             const classifications = new Set(data.links.map(link => link.value[1]));
             classifications.forEach(type => {
-                classificationFilter.append("option")
-                    .text(type)
-                    .attr("value", type)
-                    .attr("selected", true); // Set the "selected" attribute to true for all options
+                classificationFilter.append("option").text(type).attr("value", type);
             });
         } else if (this.value === "ind") {
             // Clear the multi-select box and populate it with top sources
@@ -62,10 +59,7 @@ d3.json("data2.json").then(data => {
             }, {});
             const topSources = Object.keys(sourceFrequency).sort((a, b) => sourceFrequency[b] - sourceFrequency[a]).slice(0, 10);
             topSources.forEach(source => {
-                classificationFilter.append("option")
-                    .text(source)
-                    .attr("value", source)
-                    .attr("selected", true); // Set the "selected" attribute to true for all options
+                classificationFilter.append("option").text(source).attr("value", source);
             });
         }
         updateGraph();
