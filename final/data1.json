@@ -1,0 +1,34 @@
+{
+  "nodes": [
+    { "id": "Agricultural 'waste'", "category": "Agricultural" },
+    { "id": "Bio-conversion", "category": "Bio-conversion" },
+    { "id": "Liquid", "category": "Liquid" },
+    { "id": "Losses", "category": "Losses" },
+    { "id": "Solid", "category": "Solid" },
+    { "id": "Gas", "category": "Gas" },
+    { "id": "Biofuel imports", "category": "Biofuel" },
+    { "id": "Biomass imports", "category": "Biomass" },
+    { "id": "Coal imports", "category": "Coal" },
+    { "id": "Coal", "category": "Coal" },
+    { "id": "Coal reserves", "category": "Coal" },
+    { "id": "District heating", "category": "District" },
+    { "id": "Industry", "category": "Industry" },
+    { "id": "Heating and cooling - commercial", "category": "Heating" },
+    { "id": "Heating and cooling - homes", "category": "Heating" }
+  ],
+  "links": [
+    { "source": "Agricultural 'waste'", "target": "Bio-conversion", "value": 124.729 },
+    { "source": "Bio-conversion", "target": "Liquid", "value": 0.597 },
+    { "source": "Bio-conversion", "target": "Losses", "value": 26.862 },
+    { "source": "Bio-conversion", "target": "Solid", "value": 280.322 },
+    { "source": "Bio-conversion", "target": "Gas", "value": 81.144 },
+    { "source": "Biofuel imports", "target": "Liquid", "value": 35 },
+    { "source": "Biomass imports", "target": "Solid", "value": 35 },
+    { "source": "Coal imports", "target": "Coal", "value": 11.606 },
+    { "source": "Coal reserves", "target": "Coal", "value": 63.965 },
+    { "source": "Coal", "target": "Solid", "value": 75.571 },
+    { "source": "District heating", "target": "Industry", "value": 10.639 },
+    { "source": "District heating", "target": "Heating and cooling - commercial", "value": 22.505 },
+    { "source": "District heating", "target": "Heating and cooling - homes", "value": 46.184 }
+  ]
+}
