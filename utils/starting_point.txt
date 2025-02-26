@@ -1,0 +1,80 @@
+import matplotlib.pyplot as plt
+
+# Three sample datasets
+dataset1 = [
+    {"antecedent": "[1,2,4]", "consequent": "[3]", "lift": 1.0, "confidence": 0.98},
+    {"antecedent": "[2,3]", "consequent": "[1]", "lift": 0.5, "confidence": 0.45},
+    {"antecedent": "[1,4]", "consequent": "[2]", "lift": 2.0, "confidence": 0.87},
+]
+
+dataset2 = [
+    {"antecedent": "[1,2,4]", "consequent": "[3]", "lift": 1.5, "confidence": 0.75},
+    {"antecedent": "[3,5]", "consequent": "[4]", "lift": 1.2, "confidence": 0.62},
+    {"antecedent": "[4,5]", "consequent": "[3]", "lift": 1.8, "confidence": 0.80},
+]
+
+dataset3 = [
+    {"antecedent": "[2,3]", "consequent": "[1]", "lift": 0.8, "confidence": 0.33},
+    {"antecedent": "[1,3]", "consequent": "[2]", "lift": 2.0, "confidence": 0.91},
+    {"antecedent": "[5,2]", "consequent": "[4]", "lift": 1.0, "confidence": 0.56},
+]
+
+# Combine all antecedents and consequents for axis labels
+all_antecedents = sorted(set(
+    [row["antecedent"] for row in dataset1] + 
+    [row["antecedent"] for row in dataset2] + 
+    [row["antecedent"] for row in dataset3]
+))
+all_consequents = sorted(set(
+    [row["consequent"] for row in dataset1] + 
+    [row["consequent"] for row in dataset2] + 
+    [row["consequent"] for row in dataset3]
+))
+
+# Create figure and axes explicitly with plt.subplots
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Function to plot a dataset with a specific color
+def plot_dataset(dataset, color, label):
+    antecedents = [row["antecedent"] for row in dataset]
+    consequents = [row["consequent"] for row in dataset]
+    lifts = [row["lift"] for row in dataset]
+    confidences = [row["confidence"] for row in dataset]
+    sizes = [conf * 1000 for conf in confidences]  # Scale confidence for bubble size
+
+    # Plot bubbles
+    for i in range(len(dataset)):
+        ax.scatter(antecedents[i], consequents[i], s=sizes[i], c=color, alpha=0.5, label=label if i == 0 else None)
+        # Add border if lift == 2
+        if lifts[i] == 2.0:
+            ax.scatter(antecedents[i], consequents[i], s=sizes[i], c='none', edgecolors='black', linewidths=2)
+
+# Plot each dataset with a different color
+plot_dataset(dataset1, 'blue', 'Dataset 1')
+plot_dataset(dataset2, 'red', 'Dataset 2')
+plot_dataset(dataset3, 'green', 'Dataset 3')
+
+# Move x-axis to the top and make labels vertical
+ax.xaxis.set_label_position('top')
+ax.xaxis.tick_top()
+ax.set_xlabel("Antecedent")
+ax.set_xticks(all_antecedents)  # Ensure all unique antecedents are shown
+plt.xticks(rotation=90, ha="center")
+
+# Move y-axis to the right and make labels horizontal
+ax.yaxis.set_label_position('right')
+ax.yaxis.tick_right()
+ax.set_ylabel("Consequent")
+ax.set_yticks(all_consequents)  # Ensure all unique consequents are shown
+plt.yticks(rotation=0, ha="left")
+
+# Customize the plot
+plt.title("FP-Growth Association Rules - Three Datasets")
+ax.grid(True, linestyle='--', alpha=0.7)
+plt.legend()  # Add a legend to distinguish datasets
+
+# Adjust layout to prevent label cutoff
+plt.tight_layout()
+
+# Show the plot
+plt.show()
